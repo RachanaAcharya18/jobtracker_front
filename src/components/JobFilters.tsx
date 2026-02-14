@@ -40,7 +40,7 @@ const locations = [
 const modes = ["All Modes", "Remote", "Hybrid", "Onsite"];
 const experiences = ["All Experience", "Fresher", "0-1", "1-3", "3-5"];
 const sources = ["All Sources", "LinkedIn", "Naukri", "Indeed"];
-const sorts = ["Latest", "Oldest"];
+const sorts = ["Latest", "Oldest", "Match Score", "Salary"];
 
 const JobFilters = ({
   search,
