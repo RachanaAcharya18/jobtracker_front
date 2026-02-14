@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Clock, Bookmark, BookmarkCheck, ExternalLink, Eye } from "lucide-react";
 import MatchBadge from "@/components/MatchBadge";
+import { JobStatus } from "@/hooks/useJobStatus";
 
 interface JobCardProps {
   job: Job;
@@ -11,6 +12,8 @@ interface JobCardProps {
   onToggleSave: (id: number) => void;
   onView: (job: Job) => void;
   matchScore?: number;
+  status: JobStatus;
+  onStatusChange: (jobId: number, status: JobStatus) => void;
 }
 
 function formatDaysAgo(days: number): string {
@@ -25,7 +28,16 @@ const sourceColors: Record<string, string> = {
   Indeed: "bg-[hsl(38,60%,93%)] text-[hsl(38,60%,30%)] border-[hsl(38,60%,82%)]",
 };
 
-const JobCard = ({ job, isSaved, onToggleSave, onView, matchScore }: JobCardProps) => {
+const statusStyles: Record<JobStatus, string> = {
+  "Not Applied": "bg-muted text-muted-foreground border-border",
+  Applied: "bg-[hsl(210,60%,94%)] text-[hsl(210,60%,30%)] border-[hsl(210,60%,85%)]",
+  Rejected: "bg-[hsl(0,60%,94%)] text-[hsl(0,60%,35%)] border-[hsl(0,60%,85%)]",
+  Selected: "bg-[hsl(145,40%,92%)] text-[hsl(145,40%,28%)] border-[hsl(145,40%,82%)]",
+};
+
+const allStatuses: JobStatus[] = ["Not Applied", "Applied", "Rejected", "Selected"];
+
+const JobCard = ({ job, isSaved, onToggleSave, onView, matchScore, status, onStatusChange }: JobCardProps) => {
   return (
     <Card className="transition-all duration-default hover:border-primary/30">
       <CardContent className="p-space-3">
@@ -65,7 +77,22 @@ const JobCard = ({ job, isSaved, onToggleSave, onView, matchScore }: JobCardProp
           {formatDaysAgo(job.postedDaysAgo)}
         </div>
 
-        <div className="mt-space-3 flex items-center gap-space-1">
+        {/* Status selector */}
+        <div className="mt-space-2 flex flex-wrap items-center gap-1">
+          {allStatuses.map((s) => (
+            <button
+              key={s}
+              onClick={() => onStatusChange(job.id, s)}
+              className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors ${
+                status === s ? statusStyles[s] : "bg-transparent text-muted-foreground/60 border-transparent hover:border-border"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-space-2 flex items-center gap-space-1">
           <Button variant="outline" size="sm" onClick={() => onView(job)}>
             <Eye className="h-3.5 w-3.5" />
             View

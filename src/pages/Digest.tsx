@@ -1,13 +1,22 @@
-import { Mail, Copy, MailOpen, Sparkles, AlertCircle, SearchX } from "lucide-react";
+import { Mail, Copy, MailOpen, Sparkles, AlertCircle, SearchX, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDigest } from "@/hooks/useDigest";
+import { useJobStatus } from "@/hooks/useJobStatus";
+import { jobs } from "@/data/jobs";
 import MatchBadge from "@/components/MatchBadge";
 import { useToast } from "@/hooks/use-toast";
 
+const statusBadgeStyles: Record<string, string> = {
+  Applied: "bg-[hsl(210,60%,94%)] text-[hsl(210,60%,30%)] border-[hsl(210,60%,85%)]",
+  Rejected: "bg-[hsl(0,60%,94%)] text-[hsl(0,60%,35%)] border-[hsl(0,60%,85%)]",
+  Selected: "bg-[hsl(145,40%,92%)] text-[hsl(145,40%,28%)] border-[hsl(145,40%,82%)]",
+};
+
 const Digest = () => {
   const { digest, generate, digestText, hasPreferences, today } = useDigest();
+  const { changes } = useJobStatus();
   const { toast } = useToast();
 
   const handleCopy = async () => {
@@ -24,6 +33,12 @@ const Digest = () => {
   };
 
   const hasPref = hasPreferences();
+
+  // Recent status changes (last 10)
+  const recentChanges = changes.slice(0, 10).map((c) => {
+    const job = jobs.find((j) => j.id === c.jobId);
+    return { ...c, job };
+  }).filter((c) => c.job);
 
   if (!hasPref) {
     return (
@@ -63,6 +78,13 @@ const Digest = () => {
         <p className="mt-space-2 text-xs text-muted-foreground">
           Demo Mode: Daily 9AM trigger simulated manually.
         </p>
+
+        {/* Show recent status updates even without digest */}
+        {recentChanges.length > 0 && (
+          <div className="mt-space-4 w-full max-w-2xl">
+            <RecentStatusSection changes={recentChanges} />
+          </div>
+        )}
       </div>
     );
   }
@@ -164,6 +186,13 @@ const Digest = () => {
           </Button>
         </div>
 
+        {/* Recent Status Updates */}
+        {recentChanges.length > 0 && (
+          <div className="mt-space-4">
+            <RecentStatusSection changes={recentChanges} />
+          </div>
+        )}
+
         <p className="mt-space-3 text-center text-xs text-muted-foreground">
           Demo Mode: Daily 9AM trigger simulated manually.
         </p>
@@ -171,5 +200,36 @@ const Digest = () => {
     </div>
   );
 };
+
+function RecentStatusSection({ changes }: { changes: Array<{ jobId: number; status: string; date: string; job: any }> }) {
+  return (
+    <Card>
+      <div className="border-b px-space-3 py-space-2">
+        <div className="flex items-center gap-space-1">
+          <Activity className="h-4 w-4 text-muted-foreground" />
+          <h2 className="font-serif text-base font-semibold text-foreground">Recent Status Updates</h2>
+        </div>
+      </div>
+      <CardContent className="divide-y p-0">
+        {changes.map((c, i) => (
+          <div key={`${c.jobId}-${i}`} className="flex items-center justify-between px-space-3 py-space-2">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">{c.job.title}</p>
+              <p className="text-xs text-muted-foreground">{c.job.company}</p>
+            </div>
+            <div className="flex items-center gap-space-1 shrink-0">
+              <Badge variant="outline" className={`text-xs ${statusBadgeStyles[c.status] || ""}`}>
+                {c.status}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
+                {new Date(c.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+              </span>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default Digest;
