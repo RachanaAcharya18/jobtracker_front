@@ -3,11 +3,15 @@ import { Bookmark } from "lucide-react";
 import { jobs } from "@/data/jobs";
 import { Job } from "@/types/job";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
+import { useJobStatus, JobStatus } from "@/hooks/useJobStatus";
 import JobCard from "@/components/JobCard";
 import JobDetailModal from "@/components/JobDetailModal";
+import { useToast } from "@/hooks/use-toast";
 
 const Saved = () => {
   const { savedIds, isSaved, toggleSave } = useSavedJobs();
+  const { getStatus, setStatus: setJobStatus } = useJobStatus();
+  const { toast } = useToast();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -16,6 +20,13 @@ const Saved = () => {
   const handleView = (job: Job) => {
     setSelectedJob(job);
     setModalOpen(true);
+  };
+
+  const handleStatusChange = (jobId: number, status: JobStatus) => {
+    setJobStatus(jobId, status);
+    if (status !== "Not Applied") {
+      toast({ title: `Status updated: ${status}` });
+    }
   };
 
   if (savedJobs.length === 0) {
@@ -52,6 +63,8 @@ const Saved = () => {
               isSaved={isSaved(job.id)}
               onToggleSave={toggleSave}
               onView={handleView}
+              status={getStatus(job.id)}
+              onStatusChange={handleStatusChange}
             />
           ))}
         </div>

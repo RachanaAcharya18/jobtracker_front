@@ -3,6 +3,7 @@ import { jobs } from "@/data/jobs";
 import { Job } from "@/types/job";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 import { usePreferences } from "@/hooks/usePreferences";
+import { useJobStatus, JobStatus } from "@/hooks/useJobStatus";
 import { computeMatchScore } from "@/lib/matchScore";
 import JobCard from "@/components/JobCard";
 import JobFilters from "@/components/JobFilters";
@@ -10,6 +11,7 @@ import JobDetailModal from "@/components/JobDetailModal";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, SearchX } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 function extractSalaryNum(s: string): number {
   const m = s.match(/(\d+)/);
@@ -19,6 +21,8 @@ function extractSalaryNum(s: string): number {
 const Dashboard = () => {
   const { isSaved, toggleSave } = useSavedJobs();
   const { preferences, hasPreferences } = usePreferences();
+  const { getStatus, setStatus: setJobStatus } = useJobStatus();
+  const { toast } = useToast();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [showOnlyMatches, setShowOnlyMatches] = useState(false);
@@ -29,6 +33,7 @@ const Dashboard = () => {
   const [experience, setExperience] = useState("All Experience");
   const [source, setSource] = useState("All Sources");
   const [sort, setSort] = useState("Latest");
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
 
   const scored = useMemo(() => {
     const hasPref = hasPreferences();
@@ -61,6 +66,9 @@ const Dashboard = () => {
     if (source !== "All Sources") {
       result = result.filter((r) => r.job.source === source);
     }
+    if (statusFilter !== "All Statuses") {
+      result = result.filter((r) => getStatus(r.job.id) === statusFilter);
+    }
     if (showOnlyMatches && hasPreferences()) {
       result = result.filter((r) => r.matchScore >= preferences.minMatchScore);
     }
@@ -76,11 +84,18 @@ const Dashboard = () => {
     }
 
     return result;
-  }, [scored, search, location, mode, experience, source, sort, showOnlyMatches, preferences, hasPreferences]);
+  }, [scored, search, location, mode, experience, source, sort, showOnlyMatches, preferences, hasPreferences, statusFilter, getStatus]);
 
   const handleView = (job: Job) => {
     setSelectedJob(job);
     setModalOpen(true);
+  };
+
+  const handleStatusChange = (jobId: number, status: JobStatus) => {
+    setJobStatus(jobId, status);
+    if (status !== "Not Applied") {
+      toast({ title: `Status updated: ${status}` });
+    }
   };
 
   const hasPref = hasPreferences();
@@ -121,6 +136,8 @@ const Dashboard = () => {
             onSourceChange={setSource}
             sort={sort}
             onSortChange={setSort}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
           />
         </div>
 
@@ -146,6 +163,8 @@ const Dashboard = () => {
               onToggleSave={toggleSave}
               onView={handleView}
               matchScore={hasPref ? r.matchScore : undefined}
+              status={getStatus(r.job.id)}
+              onStatusChange={handleStatusChange}
             />
           ))}
         </div>

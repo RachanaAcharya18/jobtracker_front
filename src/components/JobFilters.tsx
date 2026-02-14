@@ -21,6 +21,8 @@ interface JobFiltersProps {
   onSourceChange: (value: string) => void;
   sort: string;
   onSortChange: (value: string) => void;
+  statusFilter?: string;
+  onStatusFilterChange?: (value: string) => void;
 }
 
 const locations = [
@@ -41,6 +43,7 @@ const modes = ["All Modes", "Remote", "Hybrid", "Onsite"];
 const experiences = ["All Experience", "Fresher", "0-1", "1-3", "3-5"];
 const sources = ["All Sources", "LinkedIn", "Naukri", "Indeed"];
 const sorts = ["Latest", "Oldest", "Match Score", "Salary"];
+const statuses = ["All Statuses", "Not Applied", "Applied", "Rejected", "Selected"];
 
 const JobFilters = ({
   search,
@@ -55,6 +58,8 @@ const JobFilters = ({
   onSourceChange,
   sort,
   onSortChange,
+  statusFilter,
+  onStatusFilterChange,
 }: JobFiltersProps) => {
   return (
     <div className="flex flex-col gap-space-2">
@@ -111,6 +116,19 @@ const JobFilters = ({
             ))}
           </SelectContent>
         </Select>
+
+        {statusFilter !== undefined && onStatusFilterChange && (
+          <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {statuses.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <Select value={sort} onValueChange={onSortChange}>
           <SelectTrigger className="w-[130px]">
