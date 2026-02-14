@@ -3,12 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Clock, Bookmark, BookmarkCheck, ExternalLink, Eye } from "lucide-react";
+import MatchBadge from "@/components/MatchBadge";
 
 interface JobCardProps {
   job: Job;
   isSaved: boolean;
   onToggleSave: (id: number) => void;
   onView: (job: Job) => void;
+  matchScore?: number;
 }
 
 function formatDaysAgo(days: number): string {
@@ -23,7 +25,7 @@ const sourceColors: Record<string, string> = {
   Indeed: "bg-[hsl(38,60%,93%)] text-[hsl(38,60%,30%)] border-[hsl(38,60%,82%)]",
 };
 
-const JobCard = ({ job, isSaved, onToggleSave, onView }: JobCardProps) => {
+const JobCard = ({ job, isSaved, onToggleSave, onView, matchScore }: JobCardProps) => {
   return (
     <Card className="transition-all duration-default hover:border-primary/30">
       <CardContent className="p-space-3">
@@ -34,12 +36,15 @@ const JobCard = ({ job, isSaved, onToggleSave, onView }: JobCardProps) => {
             </h3>
             <p className="mt-1 text-sm font-medium text-foreground/80">{job.company}</p>
           </div>
-          <Badge
-            variant="outline"
-            className={`shrink-0 text-xs ${sourceColors[job.source] || ""}`}
-          >
-            {job.source}
-          </Badge>
+          <div className="flex items-center gap-space-1 shrink-0">
+            {matchScore !== undefined && <MatchBadge score={matchScore} />}
+            <Badge
+              variant="outline"
+              className={`text-xs ${sourceColors[job.source] || ""}`}
+            >
+              {job.source}
+            </Badge>
+          </div>
         </div>
 
         <div className="mt-space-2 flex flex-wrap items-center gap-space-2 text-sm text-muted-foreground">
