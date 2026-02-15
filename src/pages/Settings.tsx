@@ -13,10 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, Save, CheckCircle } from "lucide-react";
+import { X, Save, CheckCircle, RotateCcw, AlertTriangle, Info } from "lucide-react";
 import { usePreferences } from "@/hooks/usePreferences";
 import { Preferences } from "@/types/preferences";
 import { toast } from "sonner";
+import { useTestChecklist, TEST_ITEMS } from "@/hooks/useTestChecklist";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 
 const ALL_LOCATIONS = [
   "Bangalore", "Chennai", "Hyderabad", "Mumbai", "Pune",
@@ -28,6 +31,7 @@ const EXPERIENCE_LEVELS = ["Fresher", "0-1", "1-3", "3-5"];
 
 const Settings = () => {
   const { preferences, save } = usePreferences();
+  const { checked, toggle, reset, passedCount, allPassed, total } = useTestChecklist();
 
   const [roleKeywords, setRoleKeywords] = useState(preferences.roleKeywords.join(", "));
   const [selectedLocations, setSelectedLocations] = useState<string[]>(preferences.preferredLocations);
@@ -213,6 +217,66 @@ const Settings = () => {
             <Save className="mr-2 h-4 w-4" />
             Save Preferences
           </Button>
+        </div>
+
+        <Separator className="my-space-4" />
+
+        {/* Test Checklist */}
+        <div>
+          <h2 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
+            Test Checklist
+          </h2>
+          <p className="mt-space-1 text-muted-foreground">
+            Verify each feature before shipping.
+          </p>
+
+          <div className="mt-space-3 rounded-md border border-border bg-card p-space-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-foreground">
+                Tests Passed: {passedCount} / {total}
+              </p>
+              <Button variant="ghost" size="sm" onClick={reset}>
+                <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                Reset
+              </Button>
+            </div>
+
+            {!allPassed && (
+              <div className="mt-space-2 flex items-center gap-space-2 rounded-md border border-warning/30 bg-warning/5 p-space-2">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-warning" />
+                <p className="text-xs text-muted-foreground">
+                  Resolve all issues before shipping.
+                </p>
+              </div>
+            )}
+
+            <div className="mt-space-3 flex flex-col gap-space-2">
+              {TEST_ITEMS.map((item) => (
+                <label
+                  key={item.id}
+                  className="flex items-center gap-2 cursor-pointer rounded-md p-1.5 transition-all duration-[200ms] ease-in-out hover:bg-accent/50"
+                >
+                  <Checkbox
+                    checked={!!checked[item.id]}
+                    onCheckedChange={() => toggle(item.id)}
+                  />
+                  <span className={`flex-1 text-sm ${checked[item.id] ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                    {item.label}
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        <Info className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="left" className="max-w-[220px] text-xs">
+                      {item.howToTest}
+                    </TooltipContent>
+                  </Tooltip>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
