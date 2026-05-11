@@ -25,7 +25,7 @@ export default function Register() {
     }
 
     try {
-      const res = await fetch("http://localhost:8082/auth/register", {
+      const res = await fetch("https://jobtrackerback-production.up.railway.app/auth/register", {       
         method: "POST",
         headers: {
           "Content-Type": "application/json",
