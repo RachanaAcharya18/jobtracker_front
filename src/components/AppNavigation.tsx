@@ -7,7 +7,7 @@ const navItems = [
   { label: "Saved", to: "/saved" },
   { label: "Digest", to: "/digest" },
   { label: "Settings", to: "/settings" },
-  { label: "Proof", to: "/proof" },
+  { label: "Profile", to: "/profile" },
 ];
 
 const AppNavigation = () => {

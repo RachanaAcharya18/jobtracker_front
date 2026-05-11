@@ -9,8 +9,12 @@ import Dashboard from "./pages/Dashboard";
 import Saved from "./pages/Saved";
 import Digest from "./pages/Digest";
 import Settings from "./pages/Settings";
-import Proof from "./pages/Proof";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -21,13 +25,23 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route element={<AppShell />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppShell />
+              </ProtectedRoute>
+            }
+          >
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/saved" element={<Saved />} />
             <Route path="/digest" element={<Digest />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/proof" element={<Proof />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
